@@ -1,0 +1,17 @@
+FROM golang:latest
+
+WORKDIR /go/bin
+
+RUN go get github.com/canthefason/go-watcher
+
+RUN go install github.com/canthefason/go-watcher/cmd/watcher  
+
+WORKDIR /go/src/app
+
+COPY . .
+
+WORKDIR /go/src/app/cmd/golang-poc
+
+EXPOSE 8080
+
+ENTRYPOINT [ "watcher" ]
