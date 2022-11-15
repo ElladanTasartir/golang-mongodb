@@ -9,11 +9,12 @@ import (
 )
 
 type DbClient struct {
-	client *mongo.Client
+	client   *mongo.Client
+	database *mongo.Database
 }
 
-func Connect(hostname string) *DbClient {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(hostname))
+func Connect(hostname string, database string) *DbClient {
+	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(hostname))
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB")
 	}
@@ -21,10 +22,14 @@ func Connect(hostname string) *DbClient {
 	log.Printf("Succesfully conncected to MongoDB @%s", hostname)
 
 	return &DbClient{
-		client,
+		client:   mongoClient,
+		database: mongoClient.Database(database),
 	}
 }
 
-func (client *DbClient) CloseConnection() {
-	client.CloseConnection()
+func (db *DbClient) CloseConnection() {
+	err := db.client.Disconnect(context.TODO())
+	if err != nil {
+		panic(err)
+	}
 }

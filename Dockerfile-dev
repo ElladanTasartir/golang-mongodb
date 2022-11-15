@@ -1,17 +1,15 @@
 FROM golang:latest
 
-WORKDIR /go/bin
+WORKDIR /go/bin/golang-mongodb-poc
+
+COPY . .
 
 RUN go get github.com/canthefason/go-watcher
 
 RUN go install github.com/canthefason/go-watcher/cmd/watcher  
 
-WORKDIR /go/src/app
+WORKDIR /go/bin/golang-mongodb-poc/cmd/golang-poc
 
-COPY . .
-
-WORKDIR /go/src/app/cmd/golang-poc
-
-EXPOSE 8080
+EXPOSE 3333
 
 ENTRYPOINT [ "watcher" ]
