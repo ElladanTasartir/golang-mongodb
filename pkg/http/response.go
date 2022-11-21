@@ -1,4 +1,4 @@
-package helpers
+package http
 
 import "github.com/gin-gonic/gin"
 

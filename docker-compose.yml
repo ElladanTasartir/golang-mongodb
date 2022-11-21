@@ -10,7 +10,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - .:/go/bin/golang-mongodb-poc
+      - .:/go/bin/golang-mongodb
     ports:
       - 3333:3333
 

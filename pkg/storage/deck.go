@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -24,8 +25,7 @@ type Deck struct {
 	FusionCards []Card             `json:"fusion_cards" bson:"fusion_cards,omitempty"`
 }
 
-func (d *Deck) MarshalBSON() ([]byte, error) {
-	fmt.Println("Tome")
+func (d *Deck) MarshalJSON() ([]byte, error) {
 	if d.Cards == nil {
 		d.Cards = make([]Card, 0)
 	}
@@ -36,7 +36,7 @@ func (d *Deck) MarshalBSON() ([]byte, error) {
 
 	type newDeck Deck
 
-	return bson.Marshal((*newDeck)(d))
+	return json.Marshal((*newDeck)(d))
 }
 
 const deckCollection = "decks"
@@ -54,13 +54,11 @@ func CreateDeckStorage(client *DbClient) *DeckStorage {
 func (deckStorage *DeckStorage) CreateNewDeck(deck *Deck) (*Deck, error) {
 	deck.Id = primitive.NewObjectID()
 
-	result, err := deckStorage.collection.InsertOne(context.TODO(), deck)
+	_, err := deckStorage.collection.InsertOne(context.TODO(), deck)
 	if err != nil {
 		fmt.Println(err.Error())
 		return deck, err
 	}
-
-	fmt.Println(result.InsertedID)
 
 	return deck, nil
 }

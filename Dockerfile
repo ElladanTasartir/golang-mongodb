@@ -1,19 +1,19 @@
-FROM golang:latest
+FROM golang:1.19 as build
 
-WORKDIR /go/src/app
+WORKDIR /go/bin/golang-mongodb
 
 COPY . .
 
-WORKDIR /go/src/app/cmd/golang-poc
+RUN go mod download
 
-RUN go get -d -v .
+WORKDIR /go/bin/golang-mongodb/cmd/golang-poc
 
-RUN go install -v .
+RUN go build -o /golang-poc
 
-RUN go build -o ../../golang-mongodb
+FROM scratch
 
-EXPOSE 8080
+COPY --from=build /golang-poc /golang-poc
 
-WORKDIR /go/src/app
+EXPOSE 3333
 
-RUN ["./golang-mongodb"]
+RUN [ "/golang-poc" ]

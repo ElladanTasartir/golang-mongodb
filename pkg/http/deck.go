@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/ElladanTasartir/golang-mongodb/pkg/deck"
-	"github.com/ElladanTasartir/golang-mongodb/pkg/http/helpers"
 	"github.com/ElladanTasartir/golang-mongodb/pkg/storage"
 	"github.com/gin-gonic/gin"
 )
@@ -30,6 +29,7 @@ func (s *Server) AddDecksEndpoints() {
 	}
 
 	s.httpServer.GET("/decks", router.getDecks)
+	// s.httpServer.GET("/decks/:id", router.getDeckById)
 	s.httpServer.POST("/decks", router.createDecks)
 }
 
@@ -38,7 +38,7 @@ func (r *DeckRouter) createDecks(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&body); err != nil {
 		fmt.Println(body)
 		fmt.Println(err)
-		helpers.SendResponse(ctx, &helpers.Response{
+		SendResponse(ctx, &Response{
 			Code: http.StatusBadRequest,
 			Body: gin.H{
 				"message": "Error validating body of request",
@@ -55,7 +55,7 @@ func (r *DeckRouter) createDecks(ctx *gin.Context) {
 
 	deck, err := r.service.CreateNewDeck(&newDeck)
 	if err != nil {
-		helpers.SendResponse(ctx, &helpers.Response{
+		SendResponse(ctx, &Response{
 			Code: http.StatusUnprocessableEntity,
 			Body: gin.H{
 				"message": err.Error(),
@@ -63,7 +63,7 @@ func (r *DeckRouter) createDecks(ctx *gin.Context) {
 		})
 	}
 
-	helpers.SendResponse(ctx, &helpers.Response{
+	SendResponse(ctx, &Response{
 		Code: http.StatusCreated,
 		Body: deck,
 	})
@@ -72,7 +72,7 @@ func (r *DeckRouter) createDecks(ctx *gin.Context) {
 func (r *DeckRouter) getDecks(ctx *gin.Context) {
 	decks, err := r.service.RetrieveAllDecks()
 	if err != nil {
-		helpers.SendResponse(ctx, &helpers.Response{
+		SendResponse(ctx, &Response{
 			Code: http.StatusBadRequest,
 			Body: gin.H{
 				"message": err.Error(),
@@ -80,8 +80,19 @@ func (r *DeckRouter) getDecks(ctx *gin.Context) {
 		})
 	}
 
-	helpers.SendResponse(ctx, &helpers.Response{
+	SendResponse(ctx, &Response{
 		Code: http.StatusOK,
 		Body: decks,
 	})
 }
+
+// func (r *DeckRouter) getDeckById(ctx *gin.Context) {
+// 	id, sent := ctx.Params.Get("id")
+// 	if !sent {
+// 		SendResponse(ctx, &Response{
+// 			Code: http.StatusBadRequest,
+// 			Body: gin.H{
+// 				"message": "id must be sent",
+// 			},
+// 		})
+// 	}

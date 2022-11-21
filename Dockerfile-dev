@@ -1,6 +1,6 @@
-FROM golang:latest
+FROM golang:1.19
 
-WORKDIR /go/bin/golang-mongodb-poc
+WORKDIR /go/bin/golang-mongodb
 
 COPY . .
 
@@ -8,7 +8,7 @@ RUN go get github.com/canthefason/go-watcher
 
 RUN go install github.com/canthefason/go-watcher/cmd/watcher  
 
-WORKDIR /go/bin/golang-mongodb-poc/cmd/golang-poc
+WORKDIR /go/bin/golang-mongodb/cmd/golang-poc
 
 EXPOSE 3333
 
