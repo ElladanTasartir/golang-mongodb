@@ -9,6 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	apperrors "github.com/ElladanTasartir/golang-mongodb/pkg/errors"
 )
 
 type Card struct {
@@ -77,4 +79,31 @@ func (deckStorage *DeckStorage) GetDecks() (*[]Deck, error) {
 	}
 
 	return &decks, nil
+}
+
+func (deckStorage *DeckStorage) GetOneDeck(id string) (*Deck, error) {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{primitive.E{
+		Key:   "_id",
+		Value: objectId,
+	}}
+
+	var deck Deck
+	err = deckStorage.collection.FindOne(context.TODO(), filter).Decode(&deck)
+	if err != nil {
+		fmt.Print("entrei no erro")
+		if err == mongo.ErrNoDocuments {
+			return nil, &apperrors.NotFound{
+				Code: 404, Entity: "Deck",
+			}
+		}
+
+		return nil, err
+	}
+
+	return &deck, nil
 }

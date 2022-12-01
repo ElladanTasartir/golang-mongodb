@@ -16,6 +16,10 @@ func (service *DeckService) RetrieveAllDecks() (*[]storage.Deck, error) {
 	return service.deckStorage.GetDecks()
 }
 
+func (service *DeckService) RetrieveADeckById(id string) (*storage.Deck, error) {
+	return service.deckStorage.GetOneDeck(id)
+}
+
 func (service *DeckService) CreateNewDeck(deck *storage.Deck) (*storage.Deck, error) {
 	return service.deckStorage.CreateNewDeck(deck)
 }

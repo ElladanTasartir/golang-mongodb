@@ -1,10 +1,12 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/ElladanTasartir/golang-mongodb/pkg/deck"
+	apperrors "github.com/ElladanTasartir/golang-mongodb/pkg/errors"
 	"github.com/ElladanTasartir/golang-mongodb/pkg/storage"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +31,7 @@ func (s *Server) AddDecksEndpoints() {
 	}
 
 	s.httpServer.GET("/decks", router.getDecks)
-	// s.httpServer.GET("/decks/:id", router.getDeckById)
+	s.httpServer.GET("/decks/:id", router.getDeckById)
 	s.httpServer.POST("/decks", router.createDecks)
 }
 
@@ -44,6 +46,7 @@ func (r *DeckRouter) createDecks(ctx *gin.Context) {
 				"message": "Error validating body of request",
 			},
 		})
+		return
 	}
 
 	newDeck := storage.Deck{
@@ -61,12 +64,14 @@ func (r *DeckRouter) createDecks(ctx *gin.Context) {
 				"message": err.Error(),
 			},
 		})
+		return
 	}
 
 	SendResponse(ctx, &Response{
 		Code: http.StatusCreated,
 		Body: deck,
 	})
+	return
 }
 
 func (r *DeckRouter) getDecks(ctx *gin.Context) {
@@ -78,21 +83,53 @@ func (r *DeckRouter) getDecks(ctx *gin.Context) {
 				"message": err.Error(),
 			},
 		})
+		return
 	}
 
 	SendResponse(ctx, &Response{
 		Code: http.StatusOK,
 		Body: decks,
 	})
+	return
 }
 
-// func (r *DeckRouter) getDeckById(ctx *gin.Context) {
-// 	id, sent := ctx.Params.Get("id")
-// 	if !sent {
-// 		SendResponse(ctx, &Response{
-// 			Code: http.StatusBadRequest,
-// 			Body: gin.H{
-// 				"message": "id must be sent",
-// 			},
-// 		})
-// 	}
+func (r *DeckRouter) getDeckById(ctx *gin.Context) {
+	id, sent := ctx.Params.Get("id")
+	if !sent {
+		SendResponse(ctx, &Response{
+			Code: http.StatusBadRequest,
+			Body: gin.H{
+				"message": "Deck ID must be sent",
+			},
+		})
+		return
+	}
+
+	deck, err := r.service.RetrieveADeckById(id)
+	if err != nil {
+		var appError *apperrors.NotFound
+		if errors.As(err, &appError) {
+			SendResponse(ctx, &Response{
+				Code: http.StatusNotFound,
+				Body: gin.H{
+					"message": err.Error(),
+				},
+			})
+			return
+		}
+
+		SendResponse(ctx, &Response{
+			Code: http.StatusBadRequest,
+			Body: gin.H{
+				"message": err.Error(),
+			},
+		})
+		return
+	}
+
+	SendResponse(ctx, &Response{
+		Code: http.StatusOK,
+		Body: deck,
+	})
+	return
+}

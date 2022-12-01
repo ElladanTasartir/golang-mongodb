@@ -6,14 +6,12 @@ COPY . .
 
 RUN go mod download
 
-WORKDIR /go/bin/golang-mongodb/cmd/golang-poc
-
-RUN go build -o /golang-poc
+RUN go build -o golang-poc ./cmd/golang-poc/main.go
 
 FROM scratch
 
-COPY --from=build /golang-poc /golang-poc
+COPY --from=build /go/bin/golang-mongodb/golang-poc /golang-poc
 
 EXPOSE 3333
 
-RUN [ "/golang-poc" ]
+ENTRYPOINT [ "./golang-poc" ]
